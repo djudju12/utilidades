@@ -9,14 +9,18 @@ def sql_quote(dado: any) -> str:
    return "'" + num_to_str(dado).strip() + "'"   
 
 def num_to_str(dado: any) -> str:
+   if dado == None:
+      return "XXXXXXXXX"
    if type(dado) != str:
       dado = int(dado)
       dado = str(dado)
+   if not dado.isdigit():
+      return "XXXXXXXXX"
    return dado
 
 def normalize_cpf(dado:str) -> str:
-   if len(dado) < 11: 
-      return "''"
+   if len(dado.strip()) < 11: 
+      return "'XXXXXXXXXXX'"
    dado = dado.replace(" ", "/")
    dado = re.sub(r"[a-zA-Z]", "", dado)
    dado = re.sub(r"\D", "','", dado)
@@ -37,8 +41,9 @@ def from_file(path: str) -> None:
    dt = read_ods(path)
    new_path = sql_path(path)
    with open(new_path, 'w') as f:
-      for telefone, cadastro in zip(dt['telefone'], dt['cadastro']):
-         f.write(f"UPDATE CONTATOS SET CELULAR = NULL WHERE CPF IN ( {normalize_cpf(num_to_str(cadastro))} ) AND CEL = {sql_quote(telefone)}; \n")
+      for telefone, cadastro in zip(dt['Telefone'], dt['Removertelefonenestecadastro']):
+         f.write(f"UPDATE CONTATOS SET ALTERA = To_Char(SYSDATE, 'DD/MM/YYYY'), DATA_A = To_Char(SYSDATE, 'DD/MM/YYYY'), DDD_CEL = NULL, CELULAR = NULL WHERE CPF IN ( {normalize_cpf(num_to_str(cadastro))} ) AND CELULAR = {sql_quote(telefone)}; \n")
+         f.write(f"UPDATE CONTATOS SET ALTERA = To_Char(SYSDATE, 'DD/MM/YYYY'), DATA_A = To_Char(SYSDATE, 'DD/MM/YYYY'), DDD_CEL2 = NULL, CELULAR2 = NULL WHERE CPF IN ( {normalize_cpf(num_to_str(cadastro))} ) AND CELULAR2 = {sql_quote(telefone)}; \n")
 
 def main():
    if sys.argv[1] == '--file':
